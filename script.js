@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let dx = snakeSize; // horizontal delta
   let dy = 0; // vertical delta
 
+  const gameOverScreen = document.getElementById('gameOverScreen');
+  const finalScore = document.getElementById('finalScore');
+  const restartButton = document.getElementById('restartButton');
+  const quitButton = document.getElementById('quitButton');
   // Define snake, apple
   let snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
   let apple = { x: 0, y: 0 };
@@ -22,8 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen to keyboard events to move the snake
   document.addEventListener('keydown', changeDirection);
 
+  function showGameOverScreen() {
+    finalScore.textContent = `Game Over! Your Score: ${score}`;
+    gameOverScreen.style.display = 'flex'; // Show the game over screen
+  }
+
+  restartButton.addEventListener('click', () => {
+    gameOverScreen.style.display = 'none'; // Hide the game over screen
+    initGame();
+  });
+
+  quitButton.addEventListener('click', () => {
+    gameOverScreen.style.display = 'none'; // Hide the game over screen
+    window.close(); // This will not work for tabs not opened by window.open()
+  });
+
   // Game initialization
   function initGame() {
+    gameOverScreen.style.display = 'none';
     gameRunning = true;
     score = 0;
     scoreElement.textContent = score;
@@ -56,8 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Clear the canvas
   function clearCanvas() {
-    ctx.fillStyle = 'white'; // background color
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   // Draw the snake
@@ -91,11 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check collision with game boundaries
     if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height) {
       gameRunning = false;
+      showGameOverScreen(); // Show the game over screen
     }
     // Check collision with self
     for (let i = 4; i < snake.length; i++) {
       if (snake[i].x === head.x && snake[i].y === head.y) {
         gameRunning = false;
+        showGameOverScreen(); // Show the game over screen
       }
     }
   }
