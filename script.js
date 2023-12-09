@@ -68,10 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const appleImage = new Image();
+  appleImage.src = 'images/apple.png';
   // Draw the apple
+
   function drawApple() {
-    ctx.fillStyle = 'red'; // apple color
-    ctx.fillRect(apple.x, apple.y, appleSize, appleSize);
+    const scaledAppleWidth = appleSize * 1.6;
+    const scaledAppleHeight = appleSize * 1.6;
+    ctx.drawImage(appleImage, apple.x, apple.y, scaledAppleWidth, scaledAppleHeight);
   }
 
   // Clear the canvas
