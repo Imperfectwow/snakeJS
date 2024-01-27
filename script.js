@@ -1,3 +1,5 @@
+// Game initialization
+
 document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('gameCanvas');
   console.log('Script loaded');
@@ -41,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.close(); // This will not work for tabs not opened by window.open()
   });
 
-  // Game initialization
   function initGame() {
     gameOverScreen.style.display = 'none';
     gameRunning = true;
