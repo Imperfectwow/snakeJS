@@ -5,17 +5,28 @@ on:
     branches: [ master ]  # or any branch you want to trigger the workflow
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      IMAGE_TAG: ${{ steps.set_tag.outputs.IMAGE_TAG }}
 
     steps:
     - name: Check out the repository
       uses: actions/checkout@v2
 
-    # Add steps for any build or test commands you want to run here
+    - name: Set image tag
+      id: set_tag
+      run: echo "::set-output name=IMAGE_TAG::$(echo 3242executer/snake-js:latest)"
 
     - name: Build the Docker image
-      run: docker build -t 3242executer/snake-js:latest .
+      run: docker build -t ${{ steps.set_tag.outputs.IMAGE_TAG }} .
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v1
@@ -24,4 +35,4 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
     - name: Push the Docker image to Docker Hub
-      run: docker push 3242executer/snake-js:latest
+      run: docker push ${{ needs.build.outputs.IMAGE_TAG }}
