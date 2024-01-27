@@ -1,0 +1,36 @@
+body {
+  background-color: #3298dc; /* Similar to your blue color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+#gameArea {
+  position: relative;
+}
+
+#score {
+  color: #fff;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Arial', sans-serif;
+  font-size: 1.5rem;
+}
+
+#gameArea {
+  position: relative;
+  width: 750px; /* Match canvas size */
+  height: 750px; /* Match canvas size */
+  background-image: url('images/field.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+#gameCanvas {
+  border: 1px solid #000;
+}
+
