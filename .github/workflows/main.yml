@@ -1,8 +1,9 @@
-name: Build and Push Docker Image
+name: Build, Test, and Push Docker Image
 
 on:
   push:
     branches: [ master ] 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,8 +24,26 @@ jobs:
         name: snake-js-docker-image
         path: snake-js.tar
 
-  publish:
+  tests:
     needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'  # or another version of Node.js you want to use
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+  publish:
+    needs: tests
     runs-on: ubuntu-latest
     steps:
     - name: Download Docker image from artifacts
@@ -44,6 +63,3 @@ jobs:
 
     - name: Push the Docker image to Docker Hub
       run: docker push 3242executer/snake-js:latest
-    
-
-    
