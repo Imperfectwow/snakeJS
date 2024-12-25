@@ -57,7 +57,8 @@ jobs:
           if [[ "${{ github.ref_name }}" == "master" ]]; then
             echo "TAG=master_${{ github.run_id }}" >> $GITHUB_ENV
           else
-            echo "TAG=branch_${{ github.ref_name }}" >> $GITHUB_ENV
+            SANITIZED_BRANCH=$(echo "${{ github.ref_name }}" | tr '/' '-' | tr -cd '[:alnum:]-')
+            echo "TAG=branch_${SANITIZED_BRANCH}" >> $GITHUB_ENV
           fi
 
       - name: Build Docker Image
