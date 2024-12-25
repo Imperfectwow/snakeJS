@@ -1,0 +1,55 @@
+
+
+# Project name
+project:
+  name: SnakeJS
+  version: 1.0.0
+
+# Environment configuration
+environment:
+  development:
+    database:
+      host: localhost
+      port: 27017
+      name: snakejs_dev
+    server:
+      host: localhost
+      port: 3000
+  production:
+    database:
+      host: prod-db-host
+      port: 27017
+      name: snakejs_prod
+    server:
+      host: prod-server-host
+      port: 80
+
+# Build configuration
+build:
+  outputDirectory: dist
+  sourceDirectory: src
+  assetsDirectory: assets
+
+# Docker build configuration
+docker:
+  imageName: snakejs
+  tag: latest
+  dockerfilePath: Dockerfile
+  context: .
+
+# Test configuration
+test:
+  framework: jest
+  testDirectory: tests
+  coverageDirectory: coverage
+
+# Logging configuration
+logging:
+  level: info
+  file: logs/snakejs.log
+
+# Application settings
+app:
+  maxPlayers: 4
+  gameSpeed: normal
+  enableCheats: false
