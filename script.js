@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let gameRunning = false;
   let dx = snakeSize; // horizontal delta
   let dy = 0; // vertical delta
-  // just comment
+  // sssjsssust comment
   const gameOverScreen = document.getElementById('gameOverScreen');
   const finalScore = document.getElementById('finalScore');
   const restartButton = document.getElementById('restartButton');
