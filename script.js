@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let gameRunning = false;
   let dx = snakeSize; // horizontal delta
   let dy = 0; // vertical delta
-
+  // just comment
   const gameOverScreen = document.getElementById('gameOverScreen');
   const finalScore = document.getElementById('finalScore');
   const restartButton = document.getElementById('restartButton');
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Define snake, apple
   let snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
   let apple = { x: 0, y: 0 };
-
+   // comment ss
   // Place the apple randomly on the canvas in the beginning
   moveApple();
 
