@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('gameCanvas');
   console.log('Script loaded');
-// ss comment #1
+//sdasd ss comment #1
   const ctx = canvas.getContext('2d');
   const scoreElement = document.getElementById('score').querySelector('span');
   const snakeSize = 15;
