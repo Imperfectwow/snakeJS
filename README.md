@@ -1,12 +1,14 @@
 # Snake Game JS
 
-This project is a simple implementation of the classic Snake game in JavaScript, HTML, and CSS. 
+This project is a simple implementation of the classic Snake game in JavaScript, HTML, and CSS.
 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
+
+### just comment
 
 You need to have Node.js installed to use `http-server`. You can download and install Node.js from [nodejs.org](https://nodejs.org/).
 
@@ -37,3 +39,4 @@ http-server
 By default, http-server will start a local web server on port 8080. You can access the game by navigating to http://localhost:8080 in your web browser.
 
 Enjoy playing the Snake game!
+```
