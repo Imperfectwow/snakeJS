@@ -297,10 +297,24 @@ document.addEventListener('DOMContentLoaded', () => {
       togglePause();
       return;
     }
+  }
+
+  function updateScoreboard() {
+    scoreElement.textContent = score;
+    highScoreElement.textContent = highScore;
+    levelElement.textContent = level;
+  }
 
     if (!gameRunning || isPaused) {
       return;
     }
+  }
+
+    const currentDx = pendingDirection ? pendingDirection.dx : dx;
+    const currentDy = pendingDirection ? pendingDirection.dy : dy;
+
+    let newDx = currentDx;
+    let newDy = currentDy;
 
     const currentDx = pendingDirection ? pendingDirection.dx : dx;
     const currentDy = pendingDirection ? pendingDirection.dy : dy;
