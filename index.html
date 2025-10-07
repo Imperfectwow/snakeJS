@@ -11,14 +11,29 @@
 </head>
 <body>
 <div id="gameArea">
-    <div id="score">Your Score: <span>0</span></div>
+    <div id="scoreboard">
+        <div class="score-item">Score: <span id="currentScore">0</span></div>
+        <div class="score-item">Best: <span id="bestScore">0</span></div>
+        <div class="score-item">Level: <span id="currentLevel">1</span></div>
+    </div>
+
     <canvas id="gameCanvas" width="750" height="750"></canvas>
-    <div id="gameOverScreen" style="display:none;">
-      <div id="gameOverContent">
-          <p id="finalScore"></p>
-          <button id="restartButton">Restart</button>
-          <button id="quitButton">Quit</button>
-      </div>
+
+    <div id="instructions">
+        <p>Use the arrow keys to guide the snake. Press <strong>P</strong> or <strong>Space</strong> to pause or resume.</p>
+    </div>
+
+    <div id="pauseOverlay" class="overlay hidden">
+        <p>Paused</p>
+        <p>Press <strong>P</strong> or <strong>Space</strong> to continue.</p>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+        <div id="gameOverContent">
+            <p id="finalScore"></p>
+            <button id="restartButton">Restart</button>
+            <button id="quitButton">Quit</button>
+        </div>
     </div>
 </div>
 
