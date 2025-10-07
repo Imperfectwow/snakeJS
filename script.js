@@ -373,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!lastFruitElement) {
       return;
     }
+  }
 
     const prettyName = fruitType.name.charAt(0).toUpperCase() + fruitType.name.slice(1);
     lastFruitElement.textContent = `${prettyName} (+${fruitType.points})`;
