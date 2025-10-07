@@ -84,16 +84,42 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    setTimeout(() => {
+    let instructionsRemoved = false;
+
+    const finalizeRemoval = () => {
+      if (instructionsRemoved) {
+        return;
+      }
+
+      instructionsRemoved = true;
+
+      if (instructions.parentNode) {
+        instructions.parentNode.removeChild(instructions);
+      } else {
+        instructions.style.display = 'none';
+      }
+    };
+
+    const hideInstructions = () => {
+      if (!instructions || instructionsRemoved || instructions.classList.contains('instructions-hidden')) {
+        return;
+      }
+
       instructions.classList.add('instructions-hidden');
-      instructions.addEventListener(
-        'transitionend',
-        () => {
-          instructions.style.display = 'none';
-        },
-        { once: true }
-      );
-    }, 3000);
+
+      instructions.addEventListener('transitionend', finalizeRemoval, { once: true });
+
+      setTimeout(finalizeRemoval, 600);
+    };
+
+    setTimeout(hideInstructions, 3000);
+
+    const interactionHandler = () => {
+      hideInstructions();
+    };
+
+    document.addEventListener('keydown', interactionHandler, { once: true });
+    canvas.addEventListener('pointerdown', interactionHandler, { once: true });
   }
 
   function gameLoop() {
@@ -283,6 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
   }
+
+    const currentDx = pendingDirection ? pendingDirection.dx : dx;
+    const currentDy = pendingDirection ? pendingDirection.dy : dy;
+
+    let newDx = currentDx;
+    let newDy = currentDy;
 
     const currentDx = pendingDirection ? pendingDirection.dx : dx;
     const currentDy = pendingDirection ? pendingDirection.dy : dy;
