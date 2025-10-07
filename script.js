@@ -2,170 +2,402 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('gameCanvas');
-  console.log('Script loaded');
-//ssassdsdsdasd ss comment #1 another comment 
   const ctx = canvas.getContext('2d');
-  const scoreElement = document.getElementById('score').querySelector('span');
-  const snakeSize = 15;
-  const appleSize = snakeSize;
-  let snakeSpeed = 100; // time in milliseconds between each frame
-  let score = 0;
-  let gameRunning = false;
-  let dx = snakeSize; // horizontal delta
-  let dy = 0; // vertical delta
-  // sssjsssust comment
+  const scoreElement = document.getElementById('currentScore');
+  const highScoreElement = document.getElementById('bestScore');
+  const levelElement = document.getElementById('currentLevel');
+  const instructions = document.getElementById('instructions');
   const gameOverScreen = document.getElementById('gameOverScreen');
+  const pauseOverlay = document.getElementById('pauseOverlay');
   const finalScore = document.getElementById('finalScore');
   const restartButton = document.getElementById('restartButton');
   const quitButton = document.getElementById('quitButton');
-  // Define snake, apple
+
+  const snakeSize = 15;
+  const fruitSize = snakeSize;
+  const BASE_SNAKE_SPEED = 140;
+  const SPEED_STEP = 10;
+  const MIN_SNAKE_SPEED = 60;
+  const POINTS_PER_LEVEL = 5;
+
+  let snakeSpeed = BASE_SNAKE_SPEED;
+  let score = 0;
+  let level = 1;
+  let highScore = loadHighScore();
+  let gameRunning = false;
+  let isPaused = false;
+  let dx = snakeSize;
+  let dy = 0;
+  let pendingDirection = null;
+  let gameLoopId = null;
+
+  const fruitDefinitions = [
+    { name: 'banana', points: 10, src: 'images/banana.svg' },
+    { name: 'apple', points: 20, src: 'images/apple.svg' },
+    { name: 'cherry', points: 30, src: 'images/cherry.svg' },
+    { name: 'pineapple', points: 40, src: 'images/pineapple.svg' },
+    { name: 'coconut', points: 50, src: 'images/coconut.svg' },
+  ].map((fruit) => {
+    const image = new Image();
+    image.src = fruit.src;
+    return { ...fruit, image };
+  });
+
   let snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
-  let apple = { x: 0, y: 0 };
-   // comment ss
-  // Place the apple randomly on the canvas in the beginning
-  moveApple();
+  let fruit = { position: { x: 0, y: 0 }, type: fruitDefinitions[0] };
+  let fruitsEaten = 0;
 
-  // Listen to keyboard events to move the snake
-  document.addEventListener('keydown', changeDirection);
+  document.addEventListener('keydown', handleKeyDown);
 
-  function showGameOverScreen() {
-    finalScore.textContent = `Game Over! Your Score: ${score}`;
-    gameOverScreen.style.display = 'flex'; // Show the game over screen
-  }
+  scheduleInstructionsDismissal();
 
   restartButton.addEventListener('click', () => {
-    gameOverScreen.style.display = 'none'; // Hide the game over screen
+    gameOverScreen.classList.add('hidden');
     initGame();
   });
 
   quitButton.addEventListener('click', () => {
-    gameOverScreen.style.display = 'none'; // Hide the game over screen
-    window.close(); // This will not work for tabs not opened by window.open()
+    window.location.reload();
   });
 
   function initGame() {
-    gameOverScreen.style.display = 'none';
-    gameRunning = true;
+    stopGame();
     score = 0;
-    scoreElement.textContent = score;
-    snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
+    fruitsEaten = 0;
+    level = 1;
+    snakeSpeed = BASE_SNAKE_SPEED;
     dx = snakeSize;
     dy = 0;
-    moveApple();
+    pendingDirection = null;
+    snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
+    placeFruit();
+    updateScoreboard();
+    gameOverScreen.classList.add('hidden');
+    pauseOverlay.classList.add('hidden');
+    gameRunning = true;
+    isPaused = false;
     gameLoop();
   }
 
-  // Game loop
-  function gameLoop() {
-    if (gameRunning) {
-      setTimeout(() => {
-        clearCanvas();
-        drawApple();
-        drawSnake();
-        updateSnake();
-        checkCollision();
-        gameLoop();
-      }, snakeSpeed);
+  function scheduleInstructionsDismissal() {
+    if (!instructions) {
+      return;
     }
+
+    let instructionsRemoved = false;
+
+    const finalizeRemoval = () => {
+      if (instructionsRemoved) {
+        return;
+      }
+
+      instructionsRemoved = true;
+
+      if (instructions.parentNode) {
+        instructions.parentNode.removeChild(instructions);
+      } else {
+        instructions.style.display = 'none';
+      }
+    };
+
+    const hideInstructions = () => {
+      if (!instructions || instructionsRemoved || instructions.classList.contains('instructions-hidden')) {
+        return;
+      }
+
+      instructions.classList.add('instructions-hidden');
+
+      instructions.addEventListener('transitionend', finalizeRemoval, { once: true });
+
+      setTimeout(finalizeRemoval, 600);
+    };
+
+    setTimeout(hideInstructions, 3000);
+
+    const interactionHandler = () => {
+      hideInstructions();
+    };
+
+    document.addEventListener('keydown', interactionHandler, { once: true });
+    canvas.addEventListener('pointerdown', interactionHandler, { once: true });
   }
 
-  const appleImage = new Image();
-  appleImage.src = 'images/apple.png';
-  // Draw the apple
+  function gameLoop() {
+    if (!gameRunning || isPaused) {
+      return;
+    }
 
-  function drawApple() {
-    const scaledAppleWidth = appleSize * 1.6;
-    const scaledAppleHeight = appleSize * 1.6;
-    ctx.drawImage(appleImage, apple.x, apple.y, scaledAppleWidth, scaledAppleHeight);
+    gameLoopId = setTimeout(() => {
+      clearCanvas();
+      drawGrid();
+      drawFruit();
+      drawSnake();
+      updateSnake();
+      checkCollision();
+      gameLoop();
+    }, snakeSpeed);
   }
 
-  // Clear the canvas
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Draw the snake
+  function drawGrid() {
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+
+    for (let x = snakeSize; x < canvas.width; x += snakeSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+
+    for (let y = snakeSize; y < canvas.height; y += snakeSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+  }
+
+  function drawFruit() {
+    const scaledFruitWidth = fruitSize * 1.6;
+    const scaledFruitHeight = fruitSize * 1.6;
+    ctx.drawImage(
+      fruit.type.image,
+      fruit.position.x,
+      fruit.position.y,
+      scaledFruitWidth,
+      scaledFruitHeight
+    );
+  }
+
   function drawSnake() {
-    ctx.fillStyle = 'black'; // snake color
-    snake.forEach((segment) => {
+    snake.forEach((segment, index) => {
+      const gradient = ctx.createLinearGradient(
+        segment.x,
+        segment.y,
+        segment.x + snakeSize,
+        segment.y + snakeSize
+      );
+
+      if (index === 0) {
+        gradient.addColorStop(0, '#00d084');
+        gradient.addColorStop(1, '#007b43');
+      } else {
+        gradient.addColorStop(0, '#22c55e');
+        gradient.addColorStop(1, '#15803d');
+      }
+
+      ctx.fillStyle = gradient;
       ctx.fillRect(segment.x, segment.y, snakeSize, snakeSize);
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.strokeRect(segment.x, segment.y, snakeSize, snakeSize);
     });
   }
 
-  // Update the snake's position
   function updateSnake() {
-    // Create the new Snake's head
+    if (pendingDirection) {
+      dx = pendingDirection.dx;
+      dy = pendingDirection.dy;
+      pendingDirection = null;
+    }
+
     const head = { x: snake[0].x + dx, y: snake[0].y + dy };
     snake.unshift(head);
 
-    // Check if snake has eaten the apple
-    if (snake[0].x === apple.x && snake[0].y === apple.y) {
-      score += 1;
-      scoreElement.textContent = score;
-      moveApple();
+    if (head.x === fruit.position.x && head.y === fruit.position.y) {
+      handleFruitEaten();
     } else {
-      // Remove the snake's tail
       snake.pop();
     }
   }
 
-  // Check for collisions
+  function handleFruitEaten() {
+    score += fruit.type.points;
+    fruitsEaten += 1;
+    updateHighScore();
+    updateLevel();
+    placeFruit();
+    updateScoreboard();
+  }
+
+  function updateLevel() {
+    if (fruitsEaten > 0 && fruitsEaten % POINTS_PER_LEVEL === 0) {
+      level += 1;
+      snakeSpeed = Math.max(MIN_SNAKE_SPEED, snakeSpeed - SPEED_STEP);
+    }
+  }
+
   function checkCollision() {
     const head = snake[0];
-    // Check collision with game boundaries
-    if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height) {
-      gameRunning = false;
-      showGameOverScreen(); // Show the game over screen
+
+    const hitWall =
+      head.x < 0 ||
+      head.y < 0 ||
+      head.x >= canvas.width ||
+      head.y >= canvas.height;
+
+    if (hitWall) {
+      triggerGameOver();
+      return;
     }
-    // Check collision with self
+
     for (let i = 4; i < snake.length; i++) {
       if (snake[i].x === head.x && snake[i].y === head.y) {
-        gameRunning = false;
-        showGameOverScreen(); // Show the game over screen
+        triggerGameOver();
+        return;
       }
     }
   }
 
-  // Move the apple to a random position
-  function moveApple() {
-    apple.x = Math.floor(Math.random() * (canvas.width / snakeSize)) * snakeSize;
-    apple.y = Math.floor(Math.random() * (canvas.height / snakeSize)) * snakeSize;
+  function triggerGameOver() {
+    stopGame();
+    updateHighScore();
+    finalScore.innerHTML = `Game Over! Your Score: ${score}<br>Best Score: ${highScore}`;
+    gameOverScreen.classList.remove('hidden');
   }
 
-  // Change the direction of the snake based on key presses
-  function changeDirection(event) {
-    const keyPressed = event.keyCode;
-    const LEFT_KEY = 37;
-    const RIGHT_KEY = 39;
-    const UP_KEY = 38;
-    const DOWN_KEY = 40;
+  function stopGame() {
+    gameRunning = false;
+    isPaused = false;
+    if (gameLoopId) {
+      clearTimeout(gameLoopId);
+      gameLoopId = null;
+    }
+    pauseOverlay.classList.add('hidden');
+  }
 
-    const goingUp = dy === -snakeSize;
-    const goingDown = dy === snakeSize;
-    const goingRight = dx === snakeSize;
-    const goingLeft = dx === -snakeSize;
+  function placeFruit() {
+    let newFruitPosition;
 
-    if (keyPressed === LEFT_KEY && !goingRight) {
-      dx = -snakeSize;
-      dy = 0;
+    do {
+      newFruitPosition = {
+        x: Math.floor(Math.random() * (canvas.width / snakeSize)) * snakeSize,
+        y: Math.floor(Math.random() * (canvas.height / snakeSize)) * snakeSize,
+      };
+    } while (isOnSnake(newFruitPosition));
+
+    const randomFruit =
+      fruitDefinitions[Math.floor(Math.random() * fruitDefinitions.length)];
+
+    fruit = { position: newFruitPosition, type: randomFruit };
+  }
+
+  function isOnSnake(position) {
+    return snake.some((segment) => segment.x === position.x && segment.y === position.y);
+  }
+
+  function handleKeyDown(event) {
+    const key = event.key;
+
+    if (key === ' ' || key.toLowerCase() === 'p') {
+      event.preventDefault();
+      togglePause();
+      return;
     }
 
-    if (keyPressed === UP_KEY && !goingDown) {
-      dx = 0;
-      dy = -snakeSize;
+    if (!gameRunning || isPaused) {
+      return;
     }
 
-    if (keyPressed === RIGHT_KEY && !goingLeft) {
-      dx = snakeSize;
-      dy = 0;
+    const currentDx = pendingDirection ? pendingDirection.dx : dx;
+    const currentDy = pendingDirection ? pendingDirection.dy : dy;
+
+    let newDx = currentDx;
+    let newDy = currentDy;
+
+    switch (key) {
+      case 'ArrowLeft':
+        if (currentDx !== snakeSize) {
+          newDx = -snakeSize;
+          newDy = 0;
+        }
+        break;
+      case 'ArrowUp':
+        if (currentDy !== snakeSize) {
+          newDx = 0;
+          newDy = -snakeSize;
+        }
+        break;
+      case 'ArrowRight':
+        if (currentDx !== -snakeSize) {
+          newDx = snakeSize;
+          newDy = 0;
+        }
+        break;
+      case 'ArrowDown':
+        if (currentDy !== -snakeSize) {
+          newDx = 0;
+          newDy = snakeSize;
+        }
+        break;
+      default:
+        return;
     }
 
-    if (keyPressed === DOWN_KEY && !goingUp) {
-      dx = 0;
-      dy = snakeSize;
+    if (newDx !== currentDx || newDy !== currentDy) {
+      pendingDirection = { dx: newDx, dy: newDy };
     }
   }
 
-  // Start the game
+  function togglePause() {
+    if (!gameRunning) {
+      return;
+    }
+
+    if (isPaused) {
+      isPaused = false;
+      pauseOverlay.classList.add('hidden');
+      gameLoop();
+    } else {
+      isPaused = true;
+      if (gameLoopId) {
+        clearTimeout(gameLoopId);
+        gameLoopId = null;
+      }
+      pauseOverlay.classList.remove('hidden');
+    }
+  }
+
+  function updateScoreboard() {
+    scoreElement.textContent = score;
+    highScoreElement.textContent = highScore;
+    levelElement.textContent = level;
+  }
+
+  function updateHighScore() {
+    if (score > highScore) {
+      highScore = score;
+      saveHighScore(highScore);
+    }
+  }
+
+  function loadHighScore() {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return 0;
+      }
+      const stored = window.localStorage.getItem('snakeHighScore');
+      return stored ? Number(stored) || 0 : 0;
+    } catch (error) {
+      console.warn('Unable to load high score from storage.', error);
+      return 0;
+    }
+  }
+
+  function saveHighScore(value) {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return;
+      }
+      window.localStorage.setItem('snakeHighScore', String(value));
+    } catch (error) {
+      console.warn('Unable to save high score to storage.', error);
+    }
+  }
+
+  updateScoreboard();
   initGame();
 });
