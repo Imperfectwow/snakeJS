@@ -1,3 +1,5 @@
+import { buildFruitSelector } from './fruit.js';
+
 // Game initialization
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const highScoreElement = document.getElementById('bestScore');
   const levelElement = document.getElementById('currentLevel');
   const instructions = document.getElementById('instructions');
+  const lastFruitElement = document.getElementById('lastFruit');
   const gameOverScreen = document.getElementById('gameOverScreen');
   const pauseOverlay = document.getElementById('pauseOverlay');
   const finalScore = document.getElementById('finalScore');
@@ -31,17 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let pendingDirection = null;
   let gameLoopId = null;
 
-  const fruitDefinitions = [
-    { name: 'banana', points: 10, src: 'images/banana.svg' },
-    { name: 'apple', points: 20, src: 'images/apple.svg' },
-    { name: 'cherry', points: 30, src: 'images/cherry.svg' },
-    { name: 'pineapple', points: 40, src: 'images/pineapple.svg' },
-    { name: 'coconut', points: 50, src: 'images/coconut.svg' },
-  ].map((fruit) => {
-    const image = new Image();
-    image.src = fruit.src;
-    return { ...fruit, image };
-  });
+  const { definitions: fruitDefinitions, pickNext: pickNextFruit } = buildFruitSelector();
 
   let snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
   let fruit = { position: { x: 0, y: 0 }, type: fruitDefinitions[0] };
@@ -72,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
     placeFruit();
     updateScoreboard();
+    resetLastFruitDisplay();
     gameOverScreen.classList.add('hidden');
     pauseOverlay.classList.add('hidden');
     gameRunning = true;
@@ -221,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLevel();
     placeFruit();
     updateScoreboard();
+    announceFruitPoints(fruit.type);
   }
 
   function updateLevel() {
@@ -279,8 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     } while (isOnSnake(newFruitPosition));
 
-    const randomFruit =
-      fruitDefinitions[Math.floor(Math.random() * fruitDefinitions.length)];
+    const randomFruit = pickNextFruit();
 
     fruit = { position: newFruitPosition, type: randomFruit };
   }
@@ -297,24 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
       togglePause();
       return;
     }
-  }
-
-  function updateScoreboard() {
-    scoreElement.textContent = score;
-    highScoreElement.textContent = highScore;
-    levelElement.textContent = level;
-  }
 
     if (!gameRunning || isPaused) {
       return;
     }
-  }
-
-    const currentDx = pendingDirection ? pendingDirection.dx : dx;
-    const currentDy = pendingDirection ? pendingDirection.dy : dy;
-
-    let newDx = currentDx;
-    let newDy = currentDy;
 
     const currentDx = pendingDirection ? pendingDirection.dx : dx;
     const currentDy = pendingDirection ? pendingDirection.dy : dy;
@@ -376,9 +356,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateScoreboard() {
-    scoreElement.textContent = score;
-    highScoreElement.textContent = highScore;
-    levelElement.textContent = level;
+    scoreElement.textContent = String(score);
+    highScoreElement.textContent = String(highScore);
+    levelElement.textContent = String(level);
+  }
+
+  function resetLastFruitDisplay() {
+    if (!lastFruitElement) {
+      return;
+    }
+
+    lastFruitElement.textContent = '—';
+  }
+
+  function announceFruitPoints(fruitType) {
+    if (!lastFruitElement) {
+      return;
+    }
+  }
+
+    const prettyName = fruitType.name.charAt(0).toUpperCase() + fruitType.name.slice(1);
+    lastFruitElement.textContent = `${prettyName} (+${fruitType.points})`;
   }
 
   function updateHighScore() {

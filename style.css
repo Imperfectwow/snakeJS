@@ -31,6 +31,8 @@ body {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1.75rem;
   color: #fff;
   font-size: 1.25rem;
@@ -42,6 +44,10 @@ body {
 
 .score-item span {
   font-weight: 700;
+}
+
+#lastFruit {
+  white-space: nowrap;
 }
 
 #instructions {
