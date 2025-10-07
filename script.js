@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const quitButton = document.getElementById('quitButton');
 
   const snakeSize = 15;
-  const appleSize = snakeSize;
+  const fruitSize = snakeSize;
   const BASE_SNAKE_SPEED = 140;
   const SPEED_STEP = 10;
   const MIN_SNAKE_SPEED = 60;
@@ -30,11 +30,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let pendingDirection = null;
   let gameLoopId = null;
 
-  const appleImage = new Image();
-  appleImage.src = 'images/apple.png';
+  const fruitDefinitions = [
+    { name: 'banana', points: 10, src: 'images/banana.svg' },
+    { name: 'apple', points: 20, src: 'images/apple.svg' },
+    { name: 'cherry', points: 30, src: 'images/cherry.svg' },
+    { name: 'pineapple', points: 40, src: 'images/pineapple.svg' },
+    { name: 'coconut', points: 50, src: 'images/coconut.svg' },
+  ].map((fruit) => {
+    const image = new Image();
+    image.src = fruit.src;
+    return { ...fruit, image };
+  });
 
   let snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
-  let apple = { x: 0, y: 0 };
+  let fruit = { position: { x: 0, y: 0 }, type: fruitDefinitions[0] };
+  let fruitsEaten = 0;
 
   document.addEventListener('keydown', handleKeyDown);
 
@@ -50,13 +60,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function initGame() {
     stopGame();
     score = 0;
+    fruitsEaten = 0;
     level = 1;
     snakeSpeed = BASE_SNAKE_SPEED;
     dx = snakeSize;
     dy = 0;
     pendingDirection = null;
     snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
-    moveApple();
+    placeFruit();
     updateScoreboard();
     gameOverScreen.classList.add('hidden');
     pauseOverlay.classList.add('hidden');
@@ -73,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gameLoopId = setTimeout(() => {
       clearCanvas();
       drawGrid();
-      drawApple();
+      drawFruit();
       drawSnake();
       updateSnake();
       checkCollision();
@@ -104,10 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function drawApple() {
-    const scaledAppleWidth = appleSize * 1.6;
-    const scaledAppleHeight = appleSize * 1.6;
-    ctx.drawImage(appleImage, apple.x, apple.y, scaledAppleWidth, scaledAppleHeight);
+  function drawFruit() {
+    const scaledFruitWidth = fruitSize * 1.6;
+    const scaledFruitHeight = fruitSize * 1.6;
+    ctx.drawImage(
+      fruit.type.image,
+      fruit.position.x,
+      fruit.position.y,
+      scaledFruitWidth,
+      scaledFruitHeight
+    );
   }
 
   function drawSnake() {
@@ -144,23 +161,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const head = { x: snake[0].x + dx, y: snake[0].y + dy };
     snake.unshift(head);
 
-    if (head.x === apple.x && head.y === apple.y) {
-      handleAppleEaten();
+    if (head.x === fruit.position.x && head.y === fruit.position.y) {
+      handleFruitEaten();
     } else {
       snake.pop();
     }
   }
 
-  function handleAppleEaten() {
-    score += 1;
+  function handleFruitEaten() {
+    score += fruit.type.points;
+    fruitsEaten += 1;
     updateHighScore();
     updateLevel();
-    moveApple();
+    placeFruit();
     updateScoreboard();
   }
 
   function updateLevel() {
-    if (score > 0 && score % POINTS_PER_LEVEL === 0) {
+    if (fruitsEaten > 0 && fruitsEaten % POINTS_PER_LEVEL === 0) {
       level += 1;
       snakeSpeed = Math.max(MIN_SNAKE_SPEED, snakeSpeed - SPEED_STEP);
     }
@@ -205,17 +223,20 @@ document.addEventListener('DOMContentLoaded', () => {
     pauseOverlay.classList.add('hidden');
   }
 
-  function moveApple() {
-    let newApplePosition;
+  function placeFruit() {
+    let newFruitPosition;
 
     do {
-      newApplePosition = {
+      newFruitPosition = {
         x: Math.floor(Math.random() * (canvas.width / snakeSize)) * snakeSize,
         y: Math.floor(Math.random() * (canvas.height / snakeSize)) * snakeSize,
       };
-    } while (isOnSnake(newApplePosition));
+    } while (isOnSnake(newFruitPosition));
 
-    apple = newApplePosition;
+    const randomFruit =
+      fruitDefinitions[Math.floor(Math.random() * fruitDefinitions.length)];
+
+    fruit = { position: newFruitPosition, type: randomFruit };
   }
 
   function isOnSnake(position) {
