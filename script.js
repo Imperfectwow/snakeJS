@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreElement = document.getElementById('currentScore');
   const highScoreElement = document.getElementById('bestScore');
   const levelElement = document.getElementById('currentLevel');
+  const instructions = document.getElementById('instructions');
   const gameOverScreen = document.getElementById('gameOverScreen');
   const pauseOverlay = document.getElementById('pauseOverlay');
   const finalScore = document.getElementById('finalScore');
@@ -48,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keydown', handleKeyDown);
 
+  scheduleInstructionsDismissal();
+
   restartButton.addEventListener('click', () => {
     gameOverScreen.classList.add('hidden');
     initGame();
@@ -74,6 +77,23 @@ document.addEventListener('DOMContentLoaded', () => {
     gameRunning = true;
     isPaused = false;
     gameLoop();
+  }
+
+  function scheduleInstructionsDismissal() {
+    if (!instructions) {
+      return;
+    }
+
+    setTimeout(() => {
+      instructions.classList.add('instructions-hidden');
+      instructions.addEventListener(
+        'transitionend',
+        () => {
+          instructions.style.display = 'none';
+        },
+        { once: true }
+      );
+    }, 3000);
   }
 
   function gameLoop() {
@@ -251,10 +271,18 @@ document.addEventListener('DOMContentLoaded', () => {
       togglePause();
       return;
     }
+  }
+
+  function updateScoreboard() {
+    scoreElement.textContent = score;
+    highScoreElement.textContent = highScore;
+    levelElement.textContent = level;
+  }
 
     if (!gameRunning || isPaused) {
       return;
     }
+  }
 
     const currentDx = pendingDirection ? pendingDirection.dx : dx;
     const currentDy = pendingDirection ? pendingDirection.dy : dy;
