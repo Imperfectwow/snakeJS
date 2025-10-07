@@ -1,36 +1,120 @@
 body {
-  background-color: #3298dc; /* Similar to your blue color */
+  background: linear-gradient(160deg, #3298dc 0%, #1a73e8 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
-}
-
-#gameArea {
-  position: relative;
-}
-
-#score {
-  color: #fff;
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
   font-family: 'Arial', sans-serif;
-  font-size: 1.5rem;
 }
 
 #gameArea {
   position: relative;
-  width: 750px; /* Match canvas size */
-  height: 750px; /* Match canvas size */
+  width: 750px;
+  height: 750px;
   background-image: url('images/field.webp');
   background-size: cover;
   background-position: center;
+  border-radius: 18px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
 }
 
 #gameCanvas {
-  border: 1px solid #000;
+  border: none;
+  display: block;
+}
+
+#scoreboard {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1.75rem;
+  color: #fff;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+  z-index: 2;
+}
+
+.score-item span {
+  font-weight: 700;
+}
+
+#instructions {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  transition: opacity 0.5s ease;
+}
+
+#instructions.instructions-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  text-align: center;
+  padding: 24px;
+  gap: 1rem;
+  z-index: 3;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+#pauseOverlay {
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#gameOverContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#gameOverContent p {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+#gameOverContent button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #ff4f5a;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#gameOverContent button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
 }
 

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bananaBody" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff6a2" />
+      <stop offset="100%" stop-color="#f5c518" />
+    </linearGradient>
+  </defs>
+  <path fill="url(#bananaBody)" stroke="#c99700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"
+    d="M10 36c14 18 32 18 44 0-8-2-16-6-24-14-5 8-12 12-20 14z" />
+</svg>
